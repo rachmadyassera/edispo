@@ -19,6 +19,7 @@ class JabatanSeeder extends Seeder
             'name' => 'Sekretariat Daerah'
         ]);
 
+
         // 2. Buat Hirarki Jabatan
         $kepalaDaerah = Position::create([
             'id' => (string) Str::uuid(), // Tambahkan ini
@@ -41,21 +42,26 @@ class JabatanSeeder extends Seeder
             'parent_id' => $sekretarisDaerah->id,
         ]);
 
-        // 3. Buat User
-        User::create([
-            'id' => (string) Str::uuid(), // Tambahkan ini
+        // 3. Buat Role (Wajib agar @role di Blade berfungsi)
+        $roleOperator = \Spatie\Permission\Models\Role::create(['name' => 'operator']);
+        $rolePimpinan = \Spatie\Permission\Models\Role::create(['name' => 'pimpinan']);
+
+        // 4. Buat User dan Langsung Tempelkan Role-nya
+        $userOperator = User::create([
+            'id' => (string) Str::uuid(),
             'name' => 'Operator Sekda',
             'email' => 'operator@test.com',
             'password' => Hash::make('password'),
             'position_id' => null,
         ]);
+        $userOperator->assignRole($roleOperator); // Ini kunci agar dashboard berubah
 
         User::create([
-            'id' => (string) Str::uuid(), // Tambahkan ini
-            'name' => 'Walikota/Bupati',
+            'id' => (string) Str::uuid(),
+            'name' => 'Pimpinan',
             'email' => 'pimpinan@test.com',
             'password' => Hash::make('password'),
-            'position_id' => $kepalaDaerah->id,
-        ]);
+            'position_id' => null,
+        ])->assignRole($rolePimpinan);
     }
 }
